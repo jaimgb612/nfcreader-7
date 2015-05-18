@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/NFCReader.iml" filepath="$PROJECT_DIR$/NFCReader.iml" />
       <module fileurl="file://$PROJECT_DIR$/nfcreader/nfcreader.iml" filepath="$PROJECT_DIR$/nfcreader/nfcreader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nfcreader/nfcreader-nfcreader.iml" filepath="$PROJECT_DIR$/nfcreader/nfcreader-nfcreader.iml" />
     </modules>
   </component>
 </project>
