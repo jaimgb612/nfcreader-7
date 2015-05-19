@@ -1,17 +1,11 @@
 package com.tuto;
 
-import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.nfc.NdefMessage;
-import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
-import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -20,24 +14,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.util.logging.Logger;
 
 
 public class MainActivity extends ActionBarActivity {
 
-//    private NfcAdapter nfcAdapter;
-//    private static final String TAG = MainActivity.class.getSimpleName();
-//    private NfcAdapter mNfcAdapter;
-//
-//    private PendingIntent mNfcPendingIntent;
-//    private IntentFilter[] mNdefExchangeFilters;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,68 +34,63 @@ public class MainActivity extends ActionBarActivity {
                     .add(R.id.container, new PlaceholderFragment())
                     .commit();
         }
-//        intiliazeNFCHandling();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-//        mNfcAdapter.enableForegroundDispatch(this, mNfcPendingIntent, mNdefExchangeFilters, null);
         handleIntent(getIntent());
     }
 
-//
-//    // Initialize NFC to Handle data exchange.
-//    private void intiliazeNFCHandling(){
-//        Log.i(TAG, "Initializing NFC");
-//
-//        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
-//
-//        // Handle all of our received NFC intents in this activity.
-//        mNfcPendingIntent = PendingIntent.getActivity(this, 0,
-//                                                      new Intent(this, getClass()).addFlags(
-//                                                          Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-//
-//        // Intent filters for reading a note from a tag or exchanging over p2p.
-//        final IntentFilter ndefDetected = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
-//        try {
-//            ndefDetected.addDataType("text/plain");
-//        } catch (IntentFilter.MalformedMimeTypeException e) { }
-//        mNdefExchangeFilters = new IntentFilter[] { ndefDetected };
-//
-//    }
 
 
     private void handleIntent(Intent intent) {
         String action = intent.getAction();
         StringBuilder stringBuilder = new StringBuilder();
+        PlaceholderFragment fragment =
+            (PlaceholderFragment) getSupportFragmentManager().findFragmentById(R.id.container);
+        TextView text = (TextView) fragment.getView().findViewById(R.id.text);
+
         if(NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)){
-            //Parcelable[] rawMsgs = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-
             String[] types = tag.getTechList();
+            stringBuilder.append("Types : ").append("\n");
+            for(String type : types){
+                stringBuilder.append(" - ").append(type).append("\n");
+            }
 
-            NfcA nfcATag = NfcA.get(tag);
+
+//            NfcA nfcATag = NfcA.get(tag);
             IsoDep isoDepTag = IsoDep.get(tag);
-
-
-
-                byte[] data = isoDepTag.getHistoricalBytes();
-                InputStreamReader inputStreamReader = new InputStreamReader(new ByteArrayInputStream(
-                    data));
-                BufferedReader reader = new BufferedReader(inputStreamReader);
-                String line = null;
+            if(isoDepTag != null){
                 try {
-                    while(( line = reader.readLine()) != null ){
-                        stringBuilder.append(line);
-                    }
+                    isoDepTag.connect();
+//                    byte[] response = isoDepTag.transceive(SELECT_APDU);
+
+                    isoDepTag.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    stringBuilder.delete(0, stringBuilder.length()-1);
+                    stringBuilder.append("ERROR : ").append(e.getStackTrace());
                 }
 
-        }
-        Log.i(MainActivity.class.getSimpleName(),stringBuilder.toString());
+            }
 
+
+//                byte[] data = isoDepTag.getHistoricalBytes();
+//                InputStreamReader inputStreamReader = new InputStreamReader(new ByteArrayInputStream(
+//                    data));
+//                BufferedReader reader = new BufferedReader(inputStreamReader);
+//                String line = null;
+//                try {
+//                    while(( line = reader.readLine()) != null ){
+//                        stringBuilder.append(line);
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+
+        }
+        text.setText(stringBuilder.toString());
     }
 
     @Override
